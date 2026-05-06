@@ -26,7 +26,7 @@ The existing 58 records and the brand mockup (KOSA, Kibuli SS Old Students, est.
 | Auth methods (v1) | Google OAuth + Phone OTP (SMS via Supabase). Apple Sign-In deferred to native-shell phase. |
 | Public site | Lean landing + auth gate. Marketing content expands in later phase. |
 | URL strategy | Single domain, route groups: `/` public, `/portal/*` member portal |
-| Working URL (v1) | `kosa-alumni.vercel.app` (Vercel free subdomain). Custom domain swap later. |
+| Working URL (v1) | `kosa-app.vercel.app` (Vercel free subdomain). Custom domain swap later. |
 | Repo | New GitHub repo `imbabali/kosa-app`. Old `kosa05-directory` repo and current Firebase database remain untouched until cutover. |
 | Deployment | Vercel — `main` branch auto-deploys to production; PRs get preview URLs. |
 | Package manager | npm (already installed). Switch to pnpm later if monorepo emerges. |
@@ -157,7 +157,7 @@ RLS:
 The Foundation spec ships in **three thin slices** so we get value live fast:
 
 **F1 — Hello-world deploy** (target: same day)
-Scaffolded Next.js, Tailwind configured, brand tokens, public landing page with the KOSA mark, deployed to `kosa-alumni.vercel.app`. No data, no auth.
+Scaffolded Next.js, Tailwind configured, brand tokens, public landing page with the KOSA mark, deployed to `kosa-app.vercel.app`. No data, no auth.
 
 **F2 — Auth shell** (target: +1 day)
 Supabase project provisioned, env wired, `/login` with Google + Phone OTP, `/portal` placeholder behind auth middleware, redirect flow.
@@ -192,7 +192,7 @@ These are explicitly deferred to keep MVP shippable.
 
 ## Acceptance criteria for "Foundation done"
 
-1. ✅ `kosa-alumni.vercel.app` loads with KOSA-branded landing page
+1. ✅ `kosa-app.vercel.app` loads with KOSA-branded landing page
 2. ✅ Sign-in works for both Google and Phone OTP
 3. ✅ Authed user lands on `/portal` with their name in the greeting
 4. ✅ All 58 alumni emails can sign in via Google when they next try (no migration needed for auth — Supabase creates the profile on first login; data migration runs in the Directory feature spec)

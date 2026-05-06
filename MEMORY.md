@@ -58,7 +58,7 @@ Auth: Google Sign-In only.
 
 ## Domain
 
-Working URL: `kosa-alumni.vercel.app` (Vercel free subdomain). Custom domain to be picked later. Strong candidate: `kosa.app` if available.
+Working URL: https://kosa-app.vercel.app (Vercel free subdomain). Custom domain to be picked later — strong candidate: `kosa.app` if available.
 
 ## Pointers
 

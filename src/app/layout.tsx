@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   },
   description:
     "The home of Kibuli Secondary School alumni. Directory, events, and digital identity for the Class of 2005 cohort. Established 1945.",
-  metadataBase: new URL("https://kosa-alumni.vercel.app"),
+  metadataBase: new URL("https://kosa-app.vercel.app"),
   openGraph: {
     title: "KOSA — Kibuli SS Old Students Association",
     description:

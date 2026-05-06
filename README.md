@@ -41,7 +41,7 @@ See `CLAUDE.md` for the canonical conventions. High level:
 
 ## Production
 
-- Live: `https://kosa-alumni.vercel.app` *(populating)*
+- Live: https://kosa-app.vercel.app
 - Old app (read-only after cutover): https://imbabali.github.io/kosa05-directory/
 
 ## Contributing
