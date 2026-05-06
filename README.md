@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KOSA App
 
-## Getting Started
+Modern alumni platform for **Kibuli SS Old Students Association** (est. 1945) — Class of 2005 cohort. Member directory, digital ID cards, events, and notices, built as a Progressive Web App and deployed on Vercel.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router) + **TypeScript** + **Tailwind v4**
+- **Supabase** — Postgres, Auth (Google + Phone OTP), Storage, Realtime
+- **Vercel** — production deploys from `main`, preview URLs on PRs
+
+## Quick start
 
 ```bash
+npm install
+cp .env.example .env.local   # fill in Supabase keys
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+App runs at `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+See `CLAUDE.md` for the canonical conventions. High level:
 
-## Learn More
+- `src/app/(marketing)/` — public pages
+- `src/app/(portal)/` — authenticated app
+- `src/lib/supabase/` — Supabase client factories
+- `supabase/migrations/` — versioned SQL
+- `docs/superpowers/specs/` — design docs
+- `archive/` — original kosa05-directory artefacts (reference only, not built)
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Script | Purpose |
+|---|---|
+| `npm run dev` | Local dev server with Turbopack |
+| `npm run build` | Production build |
+| `npm run start` | Run the production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | `tsc --noEmit` |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Production
 
-## Deploy on Vercel
+- Live: `https://kosa-alumni.vercel.app` *(populating)*
+- Old app (read-only after cutover): https://imbabali.github.io/kosa05-directory/
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Contributing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Read `CLAUDE.md` first
+2. Check the relevant spec in `docs/superpowers/specs/` for the subsystem you're touching
+3. `npm run lint && npm run typecheck && npm run build` must pass before merge

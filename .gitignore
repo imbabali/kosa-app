@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# brainstorming artifacts (Claude Code superpowers)
+.superpowers/
+
+# PII — must not enter git
+archive/Contact Information.csv
+
+# Supabase local state
+supabase/.branches
+supabase/.temp
