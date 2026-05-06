@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "./sign-out-button";
+import { BottomNav } from "@/components/nav/bottom-nav";
 
 export default async function PortalLayout({
   children,
@@ -35,18 +36,9 @@ export default async function PortalLayout({
         </div>
       </header>
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 pb-4">{children}</main>
 
-      {/* Bottom nav placeholder — to be fleshed out in F3 (Member shell) */}
-      <nav className="sticky bottom-0 border-t border-ink/5 bg-surface/95 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-around px-6 py-3 text-xs uppercase tracking-[0.18em] text-ink-muted">
-          <span aria-current="page" className="text-brand font-semibold">Home</span>
-          <span className="opacity-40">Profile</span>
-          <span className="opacity-40">Membership</span>
-          <span className="opacity-40">Messages</span>
-          <span className="opacity-40">More</span>
-        </div>
-      </nav>
+      <BottomNav />
     </div>
   );
 }

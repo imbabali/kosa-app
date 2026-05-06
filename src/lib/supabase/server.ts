@@ -1,10 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import type { Database } from "./types";
 
 export async function createClient() {
   const cookieStore = await cookies();
 
-  return createServerClient(
+  return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -19,11 +20,23 @@ export async function createClient() {
               cookieStore.set(name, value, options),
             );
           } catch {
-            // The `setAll` method was called from a Server Component.
-            // Safe to ignore — middleware refreshes the session for us.
+            // Called from a Server Component — middleware refreshes cookies.
           }
         },
       },
     },
+  );
+}
+
+/**
+ * Service-role client. Bypasses RLS — use only for admin/migration server code.
+ */
+import { createClient as createPlainClient } from "@supabase/supabase-js";
+
+export function createServiceRoleClient() {
+  return createPlainClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } },
   );
 }
