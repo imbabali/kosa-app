@@ -7,73 +7,143 @@ Canonical AI-assistant rules for this project. Other tools (Cursor, Codex, Aider
 - **Next.js 16+ (App Router)** — read `node_modules/next/dist/docs/` before writing any framework-touching code; the version evolves fast and your training data may be stale
 - **TypeScript** (strict)
 - **Tailwind v4** — no `tailwind.config.ts`; tokens live in `src/app/globals.css` via `@theme`
-- **shadcn/ui** for primitives (added when first needed)
-- **Supabase** (Postgres + Auth + Storage + Realtime) — wired in F2 (auth shell)
+- **Supabase** (Postgres + Auth + Storage + Realtime) — wired
+- **`@supabase/ssr`** with cookie-based session in `src/lib/supabase/{server,browser,middleware}.ts`
+- **`qrcode`** for the digital ID card; no other UI libs added yet (no shadcn/ui — not needed at current scope)
 - **Vercel** — `main` auto-deploys to production; every PR gets a preview URL
+- **`gh` + `vercel` + `supabase` CLIs** — work happens via CLI; browser used only for the few things with no CLI alternative (Google OAuth client creation, Twilio signup)
 
 ## Brand tokens (never hardcode hex)
 
-Defined in `src/app/globals.css` under `:root` and exposed via `@theme inline`. Use Tailwind utilities (e.g. `bg-brand`, `text-accent`).
+Defined in `src/app/globals.css` under `@theme`. Use Tailwind utilities (e.g. `bg-brand`, `text-accent`).
 
 | Token | Class prefix | Use |
 |---|---|---|
-| `--color-brand` (dark green) | `brand` | Primary surfaces, headers |
-| `--color-brand-deep` | `brand-deep` | Pressed states |
-| `--color-accent` (gold) | `accent` | Highlights, member badges, KOSA underline |
-| `--color-ink` | `ink` | Primary text |
-| `--color-ink-muted` | `ink-muted` | Secondary text |
-| `--color-surface` | `surface` | Cards |
-| `--color-surface-muted` | `surface-muted` | Page background |
-| `--color-success` | `success` | Active-member pill |
-| `--color-danger` | `danger` | Destructive actions |
+| `--color-brand` (dark green `#1F4E2D`) | `brand` | Primary surfaces, headers |
+| `--color-brand-deep` (`#143820`) | `brand-deep` | Pressed states |
+| `--color-accent` (gold `#F2C94C`) | `accent` | Highlights, member badges, KOSA underline |
+| `--color-on-dark` (`#FFFFFF`) | `on-dark` | Text on green |
+| `--color-ink` (`#0E0E10`) | `ink` | Primary text |
+| `--color-ink-muted` (`#5C5C61`) | `ink-muted` | Secondary text |
+| `--color-surface` (`#FFFFFF`) | `surface` | Cards |
+| `--color-surface-muted` (`#F7F5F0`) | `surface-muted` | Page background |
+| `--color-success` (`#10B981`) | `success` | Active-member pill |
+| `--color-danger` (`#EF4444`) | `danger` | Destructive actions |
+
+Display font: **Fraunces** (variable serif) loaded as `--font-fraunces`, applied via the `font-display` utility. Body font: **Geist** as `--font-geist-sans`. No additional fonts.
 
 ## Folder layout
 
 ```
-src/app/
-  (marketing)/   public — no auth
-  (portal)/      authenticated — gated by src/middleware.ts
-  login/         auth page
-  api/           server endpoints
-src/components/
-  ui/            shadcn primitives
-  brand/         logo, wordmark, IDCard
-  nav/           header, bottom nav
-src/lib/
-  supabase/      client factories: server, browser, middleware
-  utils/
-supabase/migrations/   versioned SQL
-docs/superpowers/specs/   design specs (one per subsystem)
-archive/   old kosa05-directory + original artefacts (not part of build)
+src/
+├── proxy.ts                       # Next.js 16 proxy (was middleware.ts) — refreshes Supabase session, gates /portal/*
+├── middleware/                    # (none — auth gating lives in proxy.ts)
+├── app/
+│   ├── icon.tsx                   # 64×64 favicon (generated via next/og ImageResponse)
+│   ├── apple-icon.tsx             # 180×180 Apple touch icon
+│   ├── opengraph-image.tsx        # 1200×630 social-share card
+│   ├── layout.tsx                 # root: metadata, fonts, themeColor
+│   ├── globals.css                # @theme tokens — only CSS file in the app
+│   ├── page.tsx                   # public landing
+│   ├── about/  contact/  privacy/  terms/  # public pages
+│   ├── not-found.tsx              # branded 404
+│   ├── login/                     # /login (page, login-form, actions)
+│   ├── auth/callback/route.ts     # OAuth + magic-link code-for-session exchange
+│   └── portal/                    # auth-gated member portal
+│       ├── layout.tsx             # header + bottom-nav (proxy.ts already gated)
+│       ├── loading.tsx            # skeleton
+│       ├── page.tsx               # home: greeting, quick-actions, latest notice + next event
+│       ├── sign-out-button.tsx
+│       ├── profile/               # view + edit + avatar upload + completeness
+│       ├── directory/             # list with search · /[id] detail
+│       ├── id-card/               # QR-coded digital ID
+│       ├── events/                # list (upcoming/past) · /[id] detail with RSVP · /[id]/ics download
+│       ├── notices/               # list with read state · /[id] detail (auto-marks-read)
+│       ├── feedback/              # member → admin form
+│       ├── more/                  # navigation hub
+│       ├── settings/delete-account/
+│       └── admin/                 # gated by isAdmin() check
+│           ├── page.tsx           # dashboard tiles
+│           ├── events/new/        # create event
+│           ├── notices/new/       # create notice
+│           └── feedback/          # view all
+├── components/
+│   ├── nav/bottom-nav.tsx         # active-state highlighting via usePathname
+│   └── ui/page-shell.tsx          # PageShell, EmptyState
+└── lib/
+    ├── supabase/
+    │   ├── server.ts              # createClient() + createServiceRoleClient()
+    │   ├── browser.ts             # createClient() with publishable key
+    │   ├── middleware.ts          # updateSession() — used by proxy.ts
+    │   └── types.ts               # generated by `supabase gen types typescript`
+    ├── queries/profile.ts         # getCurrentProfile(), isAdmin()
+    └── utils/format.ts            # date/time helpers, deriveMemberId, membershipStatus
+
+supabase/
+├── config.toml                    # auth providers, redirect URLs, storage settings
+└── migrations/                    # versioned SQL — push with `supabase db push --yes`
+
+docs/superpowers/specs/            # design specs (one per substantial change)
+archive/                           # old kosa05-directory + CSV (gitignored) + import-tools
+public/                            # static assets (manifest.webmanifest)
 ```
 
 ## Conventions
 
 - **RSC by default.** Mark `"use client"` only for forms, hooks, interactivity.
+- **Server actions** that are bound directly to `<form action={...}>` MUST return `Promise<void>`. For error display, redirect to the form URL with `?error=…` and read it from `searchParams` in the page.
+- **Server actions with `useActionState`** can return state objects (used for login form, profile form, feedback form).
 - **No raw hex in components.** Always use brand tokens.
-- **No `any` casts on Supabase responses.** Generate types via `supabase gen types typescript`.
+- **No `any` casts on Supabase responses.** Types come from `src/lib/supabase/types.ts`. Regenerate with `supabase gen types typescript --linked --schema public > src/lib/supabase/types.ts`.
 - **Server-side auth checks for protected operations.** Never trust the client.
-- **Tests** colocated next to source (`*.test.ts`). Vitest for unit; Playwright for e2e (later).
 - **One CSS file** (`globals.css`). Avoid component-scoped CSS unless unavoidable.
+- **PageShell** wraps every portal page for consistent header/back/title/subtitle treatment.
+- **Icons via `next/og`** — `icon.tsx`, `apple-icon.tsx`, `opengraph-image.tsx`. No static `.ico`/`.png` favicon files.
+
+## Auth model
+
+- **Email magic link** — works today (Supabase built-in email, 2/hour cap)
+- **Google OAuth** — UI button live; Supabase config staged in `config.toml [auth.external.google]`; awaiting `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET` from GCP Console
+- **Phone OTP** — deferred (needs Twilio)
+- **Apple Sign-In** — deferred (native phase)
+- **Account auto-link**: Supabase auto-links a Google identity to an existing email-confirmed `auth.users` row when the email matches — used to merge magic-link and Google sign-in for migrated alumni.
+- **Profile creation**: trigger `on_auth_user_created` (private schema) inserts a `public.profiles` row when a new auth user is created. Migrated users had this happen during the Firestore→Supabase migration.
+
+## Database (live)
+
+Tables (all in `public`, RLS on every one):
+
+- `profiles` — extends `auth.users(id)`. Has `is_admin`, `is_active`, member identity (`member_id`, `year_joined`, `membership_starts_at/ends_at`), profile fields, and legacy archive (`legacy_address`, `legacy_business_details`, `legacy_timestamp`, `source`).
+- `events` — admin-managed; published flag.
+- `event_rsvps` — user-managed for own row; primary key `(event_id, profile_id)`; status enum `going|maybe|not_going`.
+- `notices` — admin-managed; pinned flag.
+- `notice_reads` — per-user mark-as-read; PK `(notice_id, profile_id)`.
+- `feedback` — user inserts own; admin reads/updates all.
+
+`security definer` functions live in the `private` schema (per the Supabase skill rule). Storage `avatars` bucket is public-read with per-user write paths.
 
 ## Deployment
 
-- `main` is production. Direct push is fine (per user's "always push to main" preference).
-- Feature branches → PRs → preview URLs for changes that warrant review.
-
-## Existing data
-
-- 58 alumni records in Firestore (`kosa05-repository` Firebase project). Migration to Supabase scripted at cutover (Directory feature spec).
-- Live old app: `https://imbabali.github.io/kosa05-directory/` — runs until new app is feature-complete.
+- `main` is production. **Direct push to main** is the deploy (per user's standing preference).
+- Vercel project `kosa-app` is git-connected to `imbabali/kosa-app`; pushes auto-deploy.
+- Env vars (production) on Vercel: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`. Never commit secrets — `.env.local` is gitignored.
 
 ## Read before editing
 
-- `docs/superpowers/specs/2026-05-06-kosa-foundation-design.md` — full Foundation design
-- `MEMORY.md` — institutional context
+- `MEMORY.md` — institutional context, current data state, cutover status
+- `docs/superpowers/specs/2026-05-06-kosa-foundation-design.md` — Foundation design
+- `docs/superpowers/specs/2026-05-06-feature-inventory.md` — full feature catalogue with status
+- `docs/superpowers/specs/2026-05-06-google-oauth-setup.md` — pending CLI sequence to enable Google sign-in
 
-## Out of scope (don't add without a spec)
+## Out of scope (don't add without a fresh spec)
 
-Payments, Gallery, News/blog, native mobile (Capacitor), Apple Sign-In, Email/password auth.
+- Payments / Mobile Money (would need Stripe + Flutterwave)
+- Gallery (photo albums + uploads)
+- 1:1 messaging (moderation cost)
+- Native mobile (Capacitor wrap) — defer until PWA is stable in production usage
+- Apple Sign-In (defer to native phase)
+- Email/password auth (intentionally not used; magic link covers this need)
+- Custom SMTP — needed only if magic-link rate limit becomes painful for the 6 yahoo users (Google OAuth covers the 52 gmail users without the limit)
 
 ## Verification before claiming done
 
@@ -85,4 +155,4 @@ npm run typecheck
 npm run build
 ```
 
-For UI changes, also load the deployed preview URL and verify visually.
+For UI changes, also load the deployed URL (`https://kosa-app.vercel.app`) and verify visually. Vercel's Security Checkpoint blocks `curl` but is invisible in real browsers — don't be alarmed by 403s from CLI checks.
