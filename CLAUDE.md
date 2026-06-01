@@ -122,6 +122,9 @@ Tables (all in `public`, RLS on every one):
 
 `security definer` functions live in the `private` schema (per the Supabase skill rule). Storage `avatars` bucket is public-read with per-user write paths.
 
+### Data API grants on new tables (Supabase breaking change #45329)
+Supabase no longer auto-exposes new `public` tables to the Data API. The new default reached new projects on 2026-05-30 and applies to this existing project on **2026-10-30**. Existing tables keep their grants. Any table created after the cutover, or any migration replayed onto a fresh project or environment, comes up with no Data API access unless grants are explicit. RLS only filters rows, while the table-level GRANT is the gate PostgREST checks first. Rule: every migration that creates a `public` table must add grants mirroring its RLS policies. Established pattern: `supabase/migrations/20260601000000_add_data_api_grants.sql`. For this app, do NOT grant `anon` because the portal is gated at the proxy or middleware layer and every policy is `TO authenticated`. Grant `authenticated` only what a policy allows. Grant `service_role` full CRUD.
+
 ## Deployment
 
 - `main` is production. **Direct push to main** is the deploy (per user's standing preference).
